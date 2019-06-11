@@ -3,6 +3,8 @@ package com.sayantanbanerjee.userlocationonmap;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -24,10 +26,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.List;
+import java.util.Locale;
+
+import static android.os.Build.VERSION_CODES.M;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     LocationManager locationManager;
+    boolean flag = false;
+
+
     LocationListener locationListener;
     protected FusedLocationProviderClient fusedLocationClient;
     float a;
@@ -82,9 +92,84 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.clear();
                 Log.i("LOCATION :", location.toString());
                 LatLng newLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(newLocation).title("You are Here!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(newLocation));
 
+
+
+
+
+                Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                try{
+                    List<Address> listAddresses = geocoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
+
+                    if(listAddresses!= null && listAddresses.size() >0){
+
+
+                        String address = "You are at: ";
+                        String address2= "";
+
+                        if(listAddresses.get(0).getSubLocality() != null)
+                        {
+                            address += listAddresses.get(0).getSubLocality() + ", ";
+                        }
+                        if(listAddresses.get(0).getLocality() != null)
+                        {
+                            address += listAddresses.get(0).getLocality();
+                        }
+                        if(listAddresses.get(0).getAdminArea() != null)
+                        {
+                            address2 += listAddresses.get(0).getAdminArea() + ", ";
+                        }
+                        if(listAddresses.get(0).getCountryName() != null)
+                        {
+                            address2 += listAddresses.get(0).getCountryName();
+                        }
+                        Log.i("HERE: ",address);
+
+
+                        mMap.addMarker(new MarkerOptions().position(newLocation).title(address).snippet(address2).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                        if(flag == true)
+                        {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(newLocation));
+                        }
+                        else
+                        {
+
+
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLocation,17));
+                            flag = true;
+                        }
+
+
+
+
+                    }
+                    else
+                    {
+                        mMap.addMarker(new MarkerOptions().position(newLocation).title("You are here! No Address found").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                        if(flag == true)
+                        {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(newLocation));
+                        }
+                        else
+                        {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLocation,17));
+                            flag = true;
+                        }
+                    }
+                }catch (Exception e)
+                {
+                    mMap.addMarker(new MarkerOptions().position(newLocation).title("You are here! No Address found").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                    if(flag == true)
+                    {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(newLocation));
+                    }
+                    else
+                    {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLocation,17));
+                        flag = true;
+                    }
+                    e.printStackTrace();
+                }
 
 
             }
@@ -115,14 +200,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
-                            // Got last known location. In some rare situations this can be null.
 
+                            // Logic to handle location object
                             if (location != null) {
-                                // Logic to handle location object
+
                                 mMap.clear();
                                 LatLng newL = new LatLng(location.getLatitude(), location.getLongitude());
-                                mMap.addMarker(new MarkerOptions().position(newL).title("You are Here!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newL, 18));
+
+                                Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                                try{
+                                    List<Address> listAddresses = geocoder.getFromLocation(location.getLatitude(),location.getLongitude(),1);
+
+                                    if(listAddresses!= null && listAddresses.size() >0){
+                                        String address = "You are at: ";
+                                        String address2= "";
+
+                                        if(listAddresses.get(0).getSubLocality() != null)
+                                        {
+                                            address += listAddresses.get(0).getSubLocality() + ", ";
+                                        }
+                                        if(listAddresses.get(0).getLocality() != null)
+                                        {
+                                            address += listAddresses.get(0).getLocality();
+                                        }
+                                        if(listAddresses.get(0).getAdminArea() != null)
+                                        {
+                                            address2 += listAddresses.get(0).getAdminArea() + ", ";
+                                        }
+                                        if(listAddresses.get(0).getCountryName() != null)
+                                        {
+                                            address2 += listAddresses.get(0).getCountryName();
+                                        }
+                                        Log.i("HERE: ",address);
+                                        flag = true;
+
+                                        mMap.addMarker(new MarkerOptions().position(newL).title(address).snippet(address2).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newL,17));
+
+                                    }
+                                    else
+                                    {
+                                        flag = true;
+                                        mMap.addMarker(new MarkerOptions().position(newL).title("You are here! No Address found").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newL,17));
+                                    }
+
+                                }catch (Exception e)
+                                {
+                                    flag = true;
+                                    mMap.addMarker(new MarkerOptions().position(newL).title("You are here! No Address found").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newL,17));
+                                    e.printStackTrace();
+                                }
+                            }
+                            else
+                            {
+                                // Got last known location. In some rare situations this can be null.
                             }
                         }
                     });
