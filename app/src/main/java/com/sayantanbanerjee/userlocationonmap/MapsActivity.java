@@ -26,7 +26,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     LocationManager locationManager;
     LocationListener locationListener;
-    String a;
+    float a;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -34,7 +34,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
                 }
             }
@@ -50,6 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
     }
 
 
@@ -77,7 +78,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i("LOCATION :", location.toString());
                 LatLng newLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.addMarker(new MarkerOptions().position(newLocation).title("You are Here!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLocation, 1));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(newLocation));
+
+
+
             }
 
             @Override
@@ -105,7 +109,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.clear();
             LatLng newL = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
             mMap.addMarker(new MarkerOptions().position(newL).title("You are Here!").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newL, 1));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newL, 18));
+//            a = mMap.getCameraPosition().zoom;
         }
 
 
